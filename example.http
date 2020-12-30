@@ -1,0 +1,18 @@
+#               Login
+# POST http://localhost:8000/api/v1/rest-auth/login/
+# content-Type: application/json
+
+# {
+#     "username": "dhanu@gmail.com",
+#     "email": "dhanu@gmail.com",
+#     "password": "dhanush123"
+# }
+
+
+#           Authorization
+# GET http://localhost:8000/api/v1/users/0/
+# Content-Type: application/json
+# Authorization: Token 8ea99e600c8f6fe4c69cf05cf1149ebb9a1d8840
+
+
+# curl -X GET http://127.0.0.1:8000/api/v1/users/0/  -H "Authorization: Token 5806891703f7a0aa731165ffdb6ae03c68c5dc54"
