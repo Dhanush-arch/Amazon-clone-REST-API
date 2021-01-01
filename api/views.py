@@ -6,7 +6,8 @@ from . import models
 from . import serializers
 from rest_framework.response import Response
 from rest_framework import status
-
+from rest_framework.authtoken.models import Token
+from rest_framework.views import APIView
 
 # class UserListView(generics.ListAPIView):
 #     queryset = models.CustomUser.objects.all()
@@ -92,6 +93,7 @@ class AddToCart(generics.CreateAPIView):
     serializer_class = serializers.ProductsSerializer
 
     def post(self, request, format=None):
+        print(request, request.data)
         currentUser = models.CustomUser.objects.get(userName__id=int(request.data['user']))
         product = models.Products.objects.filter(product=models.ProductModel.objects.filter(productID=request.data['productId'])[0], user=currentUser)
         if product.exists():
@@ -133,6 +135,7 @@ class DeleteFromCart(generics.DestroyAPIView):
         currentUser = models.CustomUser.objects.get(userName__id=int(userId))
         cart = models.Cart.objects.get(cartId=int(cartId))
         product = models.ProductModel.objects.get(productID=int(uid))
+        print(product)
         products = models.Products.objects.get(product=product, user=currentUser)
         for pro in cart.products.all():
             if pro.product.productID == product.productID:
@@ -145,8 +148,8 @@ class DeleteFromCart(generics.DestroyAPIView):
         return Response(data="No", status=status.HTTP_404_NOT_FOUND)
 
 class DecreaseFromCart(generics.UpdateAPIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAuthenticated]
     
     queryset = models.Products.objects.all()
     serializer_class = serializers.ProductsSerializer
@@ -154,10 +157,11 @@ class DecreaseFromCart(generics.UpdateAPIView):
     def put(self, request, uid, cartId, userId):
         currentUser = models.CustomUser.objects.get(userName__id=int(userId))
         cart = models.Cart.objects.get(cartId=int(cartId))
-        product = models.Products.objects.get(product=int(uid), user=currentUser)
+        product = models.Products.objects.get(productsId=int(uid), user=currentUser)
         for pro in cart.products.all():
             if pro.product.productID == product.product.productID:
                 cart.price = cart.price - product.product.productPrice
+                cart.save()
                 if product.quantity > 1:
                     product.quantity = product.quantity - 1 
                     product.save()
@@ -179,3 +183,13 @@ class GetCategory(generics.ListAPIView):
         getqueryset = models.Category.objects.all()
         getserializer = serializers.CategorySerializer(getqueryset, many=True)
         return Response(data=getserializer.data, status=status.HTTP_200_OK)
+
+class UserId(APIView):
+  authentication_classes = [TokenAuthentication]
+  # permission_classes = [IsAuthenticated]
+
+  def post(self, request, format=None):
+    print("hello >>>", request.data['headers']['Authorization'].split(' ')[1])
+    queryset = Token.objects.filter(key=request.data['headers']['Authorization'].split(' ')[1])
+    serializer = serializers.UseridSerializer(queryset, many=True)
+    return Response(data=serializer.data, status=status.HTTP_200_OK)

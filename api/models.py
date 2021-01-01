@@ -6,7 +6,7 @@ from django.dispatch import receiver
 
 class CustomUser(models.Model):
     userName = models.OneToOneField(defaultUser, on_delete=models.CASCADE)
-
+    email = models.CharField(max_length=100, null=True, blank=True)
     def __str__(self):
         return str(self.userName.email)
 
@@ -14,7 +14,7 @@ class CustomUser(models.Model):
 @receiver(post_save, sender=defaultUser)
 def create_user(sender, instance, created, **kwargs):
     if created:
-        CustomUser.objects.create(userName=instance)
+        CustomUser.objects.create(userName=instance, email=instance.email)
 
 # @receiver(post_save, sender=defaultUser)
 # def save_user(sender, instance, **kwargs):
