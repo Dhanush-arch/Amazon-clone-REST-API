@@ -81,7 +81,14 @@ class CartView(generics.ListAPIView):
             getqueryset = models.Cart.objects.all()
             getserializer = serializers.CartSerializer(getqueryset, many=True)
         else:
+            print(uid)
+            currentUser = models.CustomUser.objects.get(userName__id=int(uid))
+            print(currentUser.userName)
             getqueryset = models.Cart.objects.filter(user=uid)##GET request for a specific orderdedUserID
+            if not getqueryset.exists():
+                temp = models.Cart.objects.create(user=currentUser,price=0)
+                temp.save()
+                getqueryset = models.Cart.objects.filter(user=uid)##GET request for a specific orderdedUserID
             getserializer = serializers.CartSerializer(getqueryset, many=True)
         return Response(data=getserializer.data, status=status.HTTP_200_OK)
 
