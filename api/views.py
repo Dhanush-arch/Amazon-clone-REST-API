@@ -8,7 +8,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
-
+import json
+from django.http import HttpResponse
 # class UserListView(generics.ListAPIView):
 #     queryset = models.CustomUser.objects.all()
 #     serializer_class = serializers.UserSerializer
@@ -200,3 +201,27 @@ class UserId(APIView):
     queryset = Token.objects.filter(key=request.data['headers']['Authorization'].split(' ')[1])
     serializer = serializers.UseridSerializer(queryset, many=True)
     return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+class CartProducts(APIView):
+    authentication_classes = [TokenAuthentication]
+    
+    def get(self, request, format=None):
+        print(request.query_params.get('products', ''))
+        products_nums = str(request.query_params.get('products', ''))
+        products = products_nums.split(',')
+        response_data = []
+        for i in products:
+            temp = {}
+            cart_product = models.Products.objects.filter(productsId=i)
+            if cart_product.exists():
+                cart_product = cart_product[0]
+                temp['productsId'] = cart_product.productsId
+                temp['productid'] = cart_product.product.productID
+                temp['productName'] = cart_product.product.productName
+                temp['productPrice'] = cart_product.product.productPrice
+                temp['productImage'] = "/media/" +str(cart_product.product.productImage)
+                print(str(cart_product.product.productImage))
+                temp['quantity'] = cart_product.quantity
+                response_data.append(temp)
+        print(response_data)
+        return Response(data=response_data, status=status.HTTP_200_OK)
