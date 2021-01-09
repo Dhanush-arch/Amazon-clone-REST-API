@@ -52,7 +52,7 @@ class Products(models.Model):
     product = models.ForeignKey(
         ProductModel, verbose_name="product", on_delete=models.CASCADE)
     quantity = models.IntegerField(null=True, blank=True)
-
+    ordered = models.BooleanField(default=False, null=True, blank=True)
 
 class Cart(models.Model):
     cartId = models.AutoField(primary_key=True)
