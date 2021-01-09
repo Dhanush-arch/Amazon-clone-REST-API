@@ -15,5 +15,7 @@ urlpatterns = [
     path('get-cart-products/', views.CartProducts.as_view()),
     path('payment/', views.CheckOutView.as_view()),
     path('check-payment/', views.CheckPaymentStatus.as_view()),
-    path('get-ordered-products/<int:user_id>/', views.OrderedProducts.as_view())
+    path('get-ordered-products/<int:user_id>/', views.OrderedProducts.as_view()),
+    path('set-cod/', views.SetCod.as_view()),
+    path('category-products/<str:word>/', views.CategoryProducts.as_view())
 ]

@@ -13,7 +13,7 @@ from django.http import HttpResponse
 import random
 import string
 import razorpay
-client = razorpay.Client(auth=("rzp_test_mp6FNCpzegnAZh", "rhclOvFrgFHEGSbK0YRwvXTN"))
+client = razorpay.Client(auth=("YOUR_KEY", "YOUR_SECRET"))
 # class UserListView(generics.ListAPIView):
 #     queryset = models.CustomUser.objects.all()
 #     serializer_class = serializers.UserSerializer
@@ -185,7 +185,7 @@ class DecreaseFromCart(generics.UpdateAPIView):
                     product.save()
                 else:
                     cart.products.remove(product)
-                    models.Products.objects.get(product=int(uid), user=currentUser, ordered=False).delete()
+                    models.Products.objects.get(productsId=int(uid), user=currentUser, ordered=False).delete()
                 cart.save()
                 return Response(data="yes", status=status.HTTP_200_OK)
         return Response(data="No", status=status.HTTP_404_NOT_FOUND)
@@ -284,7 +284,7 @@ class OrderedProducts(APIView):
     def get(self, request, user_id):
         currentUser = models.CustomUser.objects.get(userName__id=int(user_id))
         response = []
-        carts = models.Cart.objects.filter(user=currentUser, paymentDone=True)
+        carts = models.Cart.objects.filter(user=currentUser, paymentDone=True).order_by("-cartId")
         if carts.exists():
             for cart in carts:
                 temp = {}
@@ -305,3 +305,23 @@ class OrderedProducts(APIView):
                 response.append(temp)
             return Response(data=response, status=status.HTTP_200_OK)
         return Response(data=0, status=status.HTTP_200_OK)
+
+class SetCod(APIView):
+    def post(self, request, format=None):
+        cart_id = int(request.data['cartID'])
+        cart = models.Cart.objects.get(cartId=cart_id)
+        cart.paymentMethod = "COD"
+        cart.paymentDone = True
+        cart.save()
+        for pro in cart.products.all():
+            pro.ordered = True
+            pro.save()
+        # cart.save()
+        return Response(data=1, status=status.HTTP_200_OK)
+
+class CategoryProducts(APIView):
+    def get(self, request, word):
+        getqueryset = models.ProductModel.objects.all()
+        getqueryset_productcategory = getqueryset.filter(productCategory__name__icontains=word)
+        getserializer = serializers.ProductSerializer(getqueryset_productcategory, many=True)
+        return Response(data=getserializer.data, status=status.HTTP_200_OK)
